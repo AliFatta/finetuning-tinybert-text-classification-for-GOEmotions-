@@ -1,6 +1,3 @@
-Berikut adalah **kode `README.md` siap pakai** untuk repositori GitHub Anda. Anda bisa **langsung menyalin seluruh isi di bawah ini** ke file `README.md` tanpa perlu modifikasi tambahan.
-
-````markdown
 # Fine-Tuning TinyBERT for Multi-Label Emotion Classification (GoEmotions)
 
 ## 📥 Pre-trained Model Availability
@@ -62,9 +59,6 @@ To support multi-label classification:
 # Example label transformation
 Original: [3, 27]  # Indices for 'Anger' and 'Neutral'
 Transformed: [0.0, 0.0, 0.0, 1.0, ..., 1.0]  # Float multi-hot vector
-````
-
----
 
 ## 🧠 Tokenization and Labeling
 

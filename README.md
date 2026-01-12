@@ -11,6 +11,24 @@ A lightweight emotion classification system that fine-tunes **TinyBERT** on the 
 
 ---
 
+Drive link for full model output: 
+**https://drive.google.com/drive/folders/1eu_hNKH68tIpLsoRg1ZAq-tNHo_j9FDq?usp=drive_link**
+
+
+## Group Information
+- **Group**: Group 9  
+- **Course**: Deep Learning  
+- **Institution**: Telkom University  
+
+## Team Members
+
+| Name | NIM |
+|------|-----|
+| **Fuji Aqbal Fadhlillah** | 1103223151 |
+| **Ali Fatta Maulana** | 1103223228 |
+
+---
+
 ## 📥 Pre-trained Model Availability
 
 The fine-tuned model generated in this project can be saved locally after training.

@@ -12,7 +12,7 @@ A lightweight emotion classification system that fine-tunes **TinyBERT** on the 
 ---
 
 Drive link for full model output: 
-**https://drive.google.com/drive/folders/1eu_hNKH68tIpLsoRg1ZAq-tNHo_j9FDq?usp=drive_link**
+**https://drive.google.com/drive/folders/1dydjBu0m7FoYRQtBNVSih9jFiqB2qYMT?usp=drive_link**
 
 
 ## Group Information

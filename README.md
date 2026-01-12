@@ -1,8 +1,15 @@
+Berikut adalah file **README.md** yang telah diperbarui dan disusun rapi mengikuti struktur profesional yang Anda inginkan. File ini mencakup semua detail teknis perbaikan yang telah kita lakukan (seperti *Custom Data Collator* dan *Thresholding*).
+
+Silakan copy-paste kode di bawah ini ke dalam file `README.md` di repository Anda.
+
+```markdown
 # Fine-Tuning TinyBERT for Multi-Label Emotion Classification (GoEmotions)
 
 ## 📥 Pre-trained Model Availability
 
-> **Note:** The fine-tuned model generated in this project can be saved locally after training. Due to repository size limitations, model weights are **not directly included** in this repository. Inference can be performed immediately after training or by loading the saved model directory.
+The fine-tuned model generated in this project can be saved locally after training.  
+Due to repository size limitations, model weights are not directly included in this repository.  
+Inference can be performed immediately after training or by loading the saved model directory.
 
 ---
 
@@ -24,7 +31,7 @@
 
 ## 🎯 Purpose
 
-This project focuses on fine-tuning the **TinyBERT (4L-312D)** Encoder-only Transformer for **multi-label text classification** using the **GoEmotions** dataset. The main objective is to build an efficient and lightweight emotion classification model capable of detecting **28 distinct human emotions** from text, optimized for environments with limited computational resources such as Google Colab Free.
+This project focuses on fine-tuning the **TinyBERT (4L-312D) Encoder-only Transformer** for **multi-label text classification** using the **GoEmotions dataset**. The main objective is to create an efficient, lightweight model capable of detecting 28 distinct human emotions from text, designed to run effectively on constrained resources like Google Colab Free.
 
 ---
 
@@ -32,11 +39,11 @@ This project focuses on fine-tuning the **TinyBERT (4L-312D)** Encoder-only Tran
 
 ### Multi-Label Classification
 
-Unlike traditional multi-class classification (one label per sample), this task allows **multiple emotions to be active simultaneously** (e.g., *Joy* and *Optimism*). Therefore, the model uses **Sigmoid activation** instead of Softmax to independently estimate probabilities for each label.
+Unlike standard multi-class classification where a text belongs to only one category, this task requires the model to predict multiple active emotions simultaneously (e.g., a sentence can be both "Joy" and "Optimism"). This requires using **Sigmoid activation** rather than Softmax.
 
 ### TinyBERT Model
 
-This project uses **Huawei Noah’s TinyBERT** (`huawei-noah/TinyBERT_General_4L_312D`), a compressed BERT model obtained via knowledge distillation. Compared to BERT-Base (12 layers), TinyBERT uses only 4 layers while maintaining strong semantic understanding, making it suitable for fast experimentation and edge deployment.
+**Huawei Noah's TinyBERT** (`huawei-noah/TinyBERT_General_4L_312D`) is a compressed version of BERT produced via knowledge distillation. It retains the semantic understanding of BERT-Base while being significantly faster (approx. 4 layers vs 12 layers) and smaller, making it ideal for edge deployment and rapid experimentation.
 
 ---
 
@@ -44,90 +51,84 @@ This project uses **Huawei Noah’s TinyBERT** (`huawei-noah/TinyBERT_General_4L
 
 ### Dataset Source
 
-The **GoEmotions dataset (Simplified configuration)** is used. It consists of Reddit comments annotated with **27 emotion labels plus a Neutral class**, resulting in 28 total labels.
+The **GoEmotions** dataset (Simplified configuration) is used, consisting of Reddit comments labeled with 27 emotion categories plus "Neutral".
 
 ### Preprocessing Strategy
 
-To support multi-label classification:
-
-1. **Multi-Hot Encoding**  
-   Each sample’s labels are converted into a binary vector of length 28.
-2. **Float Casting**  
-   Labels are cast to `float32` to ensure compatibility with `BCEWithLogitsLoss`.
+To handle the multi-label nature of the data:
+- Labels are converted into a **Multi-Hot Encoding** format (a vector of 0s and 1s).
+- Labels are strictly cast to `float32` to ensure compatibility with the `BCEWithLogitsLoss` function used during training.
 
 ```python
-# Example label transformation
-Original: [3, 27]  # Indices for 'Anger' and 'Neutral'
-Transformed: [0.0, 0.0, 0.0, 1.0, ..., 1.0]  # Float multi-hot vector
+# Example Label Transformation
+Original: [3, 27]  # (Indices for 'Anger' and 'Neutral')
+Transformed: [0.0, 0.0, 0.0, 1.0, ..., 1.0]  # (Float vector)
+
+```
+
+---
 
 ## 🧠 Tokenization and Labeling
 
-* **Tokenizer:** `AutoTokenizer` from `huawei-noah/TinyBERT_General_4L_312D`
-* **Sequence Length:** Padded and truncated to a maximum of **128 tokens**
-* **Custom Data Collator:**
-  A custom `data_collator` is used to force label tensors into `torch.float32`, preventing runtime errors such as:
-
-```
-RuntimeError: result type Float can't be cast to the desired output type Long
-```
+* **Tokenizer:** Uses the `AutoTokenizer` from `huawei-noah/TinyBERT_General_4L_312D`.
+* **Truncation:** All sequences are padded and truncated to a maximum length of **128 tokens**.
+* **Custom Collator:** A custom `data_collator` is implemented to intercept batches before training. It explicitly forces label tensors into `torch.float32` format. This is critical to prevent the common PyTorch error: `RuntimeError: result type Float can't be cast to the desired output type Long`.
 
 ---
 
 ## ⚙️ Model Configuration
 
-The model is initialized using `AutoModelForSequenceClassification` with:
+The model is initialized using `AutoModelForSequenceClassification` with the following specifics:
 
-* **Problem Type:** `multi_label_classification`
-* **Number of Labels:** 28
-* **Loss Function:** `BCEWithLogitsLoss` (automatically selected by Hugging Face Trainer)
-* **Precision:** Mixed precision training (`fp16`)
-* **Fine-Tuning Strategy:** Full encoder fine-tuning
+* **Problem Type:** `multi_label_classification`.
+* **Number of Labels:** 28.
+* **Optimization:** Mixed Precision (`fp16`) is enabled to accelerate training on T4 GPUs.
+* **Loss Function:** `BCEWithLogitsLoss` (Binary Cross Entropy with Logits) is used automatically by the Trainer API for multi-label tasks.
 
 ---
 
 ## 🏋️ Training Details
 
-* **Platform:** Google Colab
-* **GPU:** Tesla T4
-* **Batch Size:** 16 (train & evaluation)
-* **Epochs:** 4
-* **Learning Rate:** 2e-5
-* **Evaluation Metric:** Micro-averaged F1 Score (robust to class imbalance)
+* **Hardware:** Google Colab (Tesla T4 GPU).
+* **Batch Size:** 16 (Train & Eval).
+* **Epochs:** 4 (Adjustable depending on convergence).
+* **Learning Rate:** 2e-5.
+* **Metric:** F1-Micro Score (suited for class imbalance).
+* **Strategy:** Full fine-tuning of the encoder layers.
 
 ---
 
 ## 🚀 Inference and Usage
 
-Inference requires post-processing of model outputs:
+Inference requires a specific post-processing step to interpret the logits:
 
-1. **Sigmoid Activation**
-   Converts logits into probabilities.
-2. **Thresholding**
-   Determines which emotions are active.
+1. **Sigmoid Activation:** Converts raw logits into probabilities (0.0 to 1.0).
+2. **Thresholding:** A threshold is applied to determine active labels.
+* *Default:* 0.5
+* *Recommended:* **0.25 - 0.30** (Given the model size, a lower threshold improves recall for subtle emotions).
 
-* Default threshold: `0.5`
-* Recommended threshold: **0.25 – 0.30**
-  (Improves recall for subtle emotions in small models)
+
 
 ```python
-# Inference example
+# Inference snippet
 probs = torch.sigmoid(logits).cpu().numpy()[0]
 predictions = (probs >= 0.25).astype(int)
+
 ```
 
 ---
 
 ## 📈 Results and Observations
 
-* **Efficiency:** Training time is significantly faster compared to BERT-Base.
-* **Performance:** The model effectively captures dominant emotions such as *Admiration* in achievement-related text.
-* **Limitations:** Smaller model capacity can distribute confidence across semantically similar emotions (e.g., *Joy*, *Love*, *Admiration*). Threshold tuning is essential for optimal results.
+* **Efficiency:** TinyBERT completes training significantly faster than BERT-Base, making it suitable for rapid iteration.
+* **Performance:** The model effectively captures dominant sentiments (e.g., "Admiration" in achievement-related texts).
+* **Analysis:** Due to the model's small size (distilled), confidence scores for nuanced emotions (like "Joy" vs "Love") may be diluted. Adjusting the decision threshold is necessary to balance Precision and Recall.
 
 ---
 
 ## 📁 Repository Structure
 
-```text
+```
 finetuning-tinybert-goemotions/
 │
 ├── notebooks/
@@ -136,6 +137,7 @@ finetuning-tinybert-goemotions/
 │   └── task1_encoder_classification_report.md
 ├── README.md
 └── requirements.txt
+
 ```
 
 ---
@@ -146,23 +148,22 @@ finetuning-tinybert-goemotions/
 
 * Python 3.8+
 * PyTorch
-* Hugging Face `transformers` and `datasets`
-* Scikit-learn
-* Accelerate
+* Hugging Face Transformers & Datasets
+* Scikit-learn & Accelerate
 
-### Installation
-
-Install dependencies using:
+Dependencies can be installed using:
 
 ```bash
 pip install -r requirements.txt
+
 ```
 
 ---
 
 ## ✅ Conclusion
 
-This project demonstrates that **TinyBERT** can be effectively fine-tuned for **multi-label emotion classification**. Through careful label preprocessing, custom data collation, and threshold adjustment during inference, meaningful emotional insights can be extracted even with a highly compressed Transformer model suitable for resource-constrained environments.
+This project demonstrates that **TinyBERT** can effectively serve as a multi-label emotion classifier. By implementing robust data processing (custom collators) and adjusting inference thresholds, we can extract meaningful emotional insights from text even with a highly compressed model architecture suitable for resource-constrained environments.
 
 ```
 
+```
